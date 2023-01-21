@@ -1,66 +1,70 @@
-import React, {useState} from "react";
+import React, { useEffect, useState } from "react";
 import AddIcon from "@material-ui/icons/Add";
-import {Fab, Zoom} from "@material-ui/core";
+import { Fab, Zoom } from "@material-ui/core";
+import { useFeatureFlag } from "configcat-react";
 
 function CreateArea(props) {
-    const [inputText, setInputText] = useState({
-        title: "",
-        content: ""
+  const [inputText, setInputText] = useState({
+    title: "",
+    content: "",
+  });
+
+  const {
+    value: isTitleFeatureEnabled,
+    loading: isTitleFeatureEnabledLoading,
+  } = useFeatureFlag("isTitleFeatureEnabled", false);
+
+  function handleChange(event) {
+    const { name, value } = event.target;
+    setInputText((prevState) => {
+      return {
+        ...prevState,
+        [name]: value,
+      };
     });
+  }
 
-    const [isClicked, setIsClicked] = useState(false)
+  function submitNote(event) {
+    props.addNote(inputText);
 
-    function expand() {
-        setIsClicked(true);
-    }
+    setInputText({
+      title: "",
+      content: "",
+    });
+    event.preventDefault();
+  }
 
-    function handleChange(event) {
-        const {name, value} = event.target;
-        setInputText(prevState => {
-            return {
-                ...prevState,
-                [name]: value
-            }
-        });
-    }
+  return (
+    <div>
+      <form className="create-note">
+        {!isTitleFeatureEnabledLoading && isTitleFeatureEnabled && (
+          <input
+            onChange={handleChange}
+            name="title"
+            placeholder="Title"
+            value={inputText.title}
+            autoComplete="off"
+          />
+        )}
 
-    function submitNote(event) {
-        props.addNote(inputText);
+        <textarea
+          onChange={handleChange}
+          name="content"
+          placeholder="Take a note..."
+          rows={3}
+          value={inputText.content}
+        />
 
-        setInputText({
-            title: "",
-            content: ""
-        });
-        event.preventDefault();
-
-    }
-
-    return (
-        <div>
-            <form className="create-note">
-
-                {
-                    isClicked && <input onChange={handleChange} name="title" placeholder="Title"
-                                        value={inputText.title} autoComplete="off"/>
-                }
-
-                <textarea onClick={expand} onChange={handleChange} name="content" placeholder="Take a note..."
-                          rows={isClicked ? 3 : 1}
-                          value={inputText.content}/>
-
-                {
-                    (inputText.title !== "" || inputText.content !== "") &&
-                    <Zoom in={true}>
-                        <Fab onClick={submitNote}>
-                            <AddIcon/>
-                        </Fab>
-                    </Zoom>
-
-                }
-
-            </form>
-        </div>
-    );
+        {(inputText.title !== "" || inputText.content !== "") && (
+          <Zoom in={true}>
+            <Fab onClick={submitNote}>
+              <AddIcon />
+            </Fab>
+          </Zoom>
+        )}
+      </form>
+    </div>
+  );
 }
 
 export default CreateArea;
