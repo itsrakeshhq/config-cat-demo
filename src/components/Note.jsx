@@ -3,10 +3,16 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import { useFeatureFlag } from "configcat-react";
 
 function Note(props) {
+  const userObject = {
+    identifier: "643564",
+    email: "rakesh@example.com",
+    country: "Japan",
+  };
+
   const {
     value: isDeleteFeatureEnabled,
     loading: isDeleteFeatureEnabledLoading,
-  } = useFeatureFlag("isDeleteFeatureEnabled", false);
+  } = useFeatureFlag("isDeleteFeatureEnabled", false, userObject);
 
   function handleClick() {
     if (!isDeleteFeatureEnabled) {
@@ -14,7 +20,7 @@ function Note(props) {
     }
     props.deleteNote(props.id);
   }
-  
+
   return (
     <div className="note">
       <h1>{props.title}</h1>
